@@ -61,18 +61,41 @@ async function run() {
       res.send(result);
     });
     app.put("/projects/:id", async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updatingProject = req.body;
-      const updateDoc = {
+    const id = req.params.id;
+    const updatedProject = req.body;
+
+    const filter = { _id: new ObjectId(id) };
+    const options = { upsert: true };
+    const skillUpdate = {
         $set: {
-          status: updatingProject.status,
-        },
-      };
-      const result = await projectsCollection.updateOne(filter, updateDoc);
-      res.send(result);
-    });
-    app.delete("/project/:id", async (req, res) => {
+            name: updatedProject.name,
+            image: updatedProject.image,
+            live_link: updatedProject.live_link,
+            client_side: updatedProject.client_side,
+            server_side: updatedProject.server_side,
+            technologies: updatedProject.technologies
+        }
+    };
+
+    try {
+        const result = await projectsCollection.updateOne(
+            filter,
+            skillUpdate,
+            options
+        );
+
+        // Check if the update was successful and respond accordingly
+        if (result.modifiedCount === 1 || result.upsertedCount === 1) {
+            res.status(200).json({ message: "project updated successfully" });
+        } else {
+            res.status(404).json({ error: "project not found" });
+        }
+    } catch (err) {
+        console.error("Error updating project:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+    app.delete("/projects/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await projectsCollection.deleteOne(query);
@@ -99,8 +122,6 @@ async function run() {
     app.put("/skills/:id", async (req, res) => {
     const id = req.params.id;
     const updatedSkill = req.body;
-
-    // Validate input to ensure updatedSkill contains only allowed fields
 
     const filter = { _id: new ObjectId(id) };
     const options = { upsert: true };
@@ -159,17 +180,38 @@ async function run() {
       res.send(result);
     });
     app.put("/educations/:id", async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updatingEducation = req.body;
-      const updateDoc = {
+    const id = req.params.id;
+    const updatedProject = req.body;
+
+    const filter = { _id: new ObjectId(id) };
+    const options = { upsert: true };
+    const educationUpdate = {
         $set: {
-          status: updatingEducation.status,
-        },
-      };
-      const result = await educationsCollection.updateOne(filter, updateDoc);
-      res.send(result);
-    });
+            name: updatedProject.name,
+            icon: updatedProject.icon,
+            title: updatedProject.title,
+            session: updatedProject.session,
+        }
+    };
+
+    try {
+        const result = await educationsCollection.updateOne(
+            filter,
+            educationUpdate,
+            options
+        );
+
+        // Check if the update was successful and respond accordingly
+        if (result.modifiedCount === 1 || result.upsertedCount === 1) {
+            res.status(200).json({ message: "project updated successfully" });
+        } else {
+            res.status(404).json({ error: "project not found" });
+        }
+    } catch (err) {
+        console.error("Error updating project:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
     app.delete("/educations/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
